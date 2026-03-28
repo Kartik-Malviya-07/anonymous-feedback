@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(formData)
                 });
 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -127,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify(formData)
                 });
 
+                if (!response.ok && response.status !== 401) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
                 if (data.success) {
@@ -161,6 +163,7 @@ async function loadFeedback() {
 
     try {
         const response = await fetch(`/get-feedback?category=${encodeURIComponent(categoryQuery)}&session_id=${encodeURIComponent(sessionQuery)}`);
+        if (!response.ok && response.status !== 401) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
 
         if (data.success) {
@@ -224,6 +227,7 @@ async function deleteFeedback(id) {
             method: "DELETE"
         });
         
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         
         if (data.success) {
@@ -269,6 +273,7 @@ async function createSession() {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({title, category})
         });
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (data.success) {
             titleInp.value = "";
@@ -292,6 +297,7 @@ async function loadSessions() {
     
     try {
         const res = await fetch("/api/sessions");
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if(data.success) {
             table.innerHTML = "";

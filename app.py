@@ -124,32 +124,34 @@ def get_feedback():
 
     try:
         feedbacks = list(feedback_collection.find(query).sort("created_at", -1))
+        
+        # Format data for JSON serialization
+        formatted_feedbacks = []
+        total_rating = 0
+        
+        for f in feedbacks:
+            f["_id"] = str(f["_id"])
+            # Format the date appropriately
+            if "created_at" in f and hasattr(f["created_at"], "strftime"):
+                f["created_at"] = f["created_at"].strftime("%b %d, %Y - %H:%M")
+            elif "created_at" in f:
+                f["created_at"] = str(f["created_at"])
+            else:
+                f["created_at"] = "Unknown date"
+                
+            total_rating += int(f.get("rating", 0))
+            formatted_feedbacks.append(f)
+            
+        avg_rating = round(total_rating / len(feedbacks), 1) if feedbacks else 0.0
+
+        return jsonify({
+            "success": True,
+            "feedbacks": formatted_feedbacks,
+            "total": len(feedbacks),
+            "average_rating": avg_rating
+        })
     except Exception as e:
         return jsonify({"success": False, "error": f"Database connection error: {str(e)}"}), 500
-    
-    # Format data for JSON serialization
-    formatted_feedbacks = []
-    total_rating = 0
-    
-    for f in feedbacks:
-        f["_id"] = str(f["_id"])
-        # Format the date appropriately
-        if "created_at" in f and f["created_at"]:
-            f["created_at"] = f["created_at"].strftime("%b %d, %Y - %H:%M")
-        else:
-            f["created_at"] = "Unknown date"
-            
-        total_rating += int(f.get("rating", 0))
-        formatted_feedbacks.append(f)
-        
-    avg_rating = round(total_rating / len(feedbacks), 1) if feedbacks else 0.0
-
-    return jsonify({
-        "success": True,
-        "feedbacks": formatted_feedbacks,
-        "total": len(feedbacks),
-        "average_rating": avg_rating
-    })
 
 @app.route("/delete-feedback/<id>", methods=["DELETE"])
 def delete_feedback(id):
@@ -196,17 +198,19 @@ def get_sessions():
         
     try:
         sessions_list = list(feedback_sessions.find().sort("created_at", -1))
+        
+        formatted_sessions = []
+        for s in sessions_list:
+            s["_id"] = str(s["_id"])
+            if "created_at" in s and hasattr(s["created_at"], "strftime"):
+                s["created_at"] = s["created_at"].strftime("%b %d, %Y")
+            elif "created_at" in s:
+                s["created_at"] = str(s["created_at"])
+            formatted_sessions.append(s)
+            
+        return jsonify({"success": True, "sessions": formatted_sessions})
     except Exception as e:
         return jsonify({"success": False, "error": f"Database error: {str(e)}"}), 500
-    
-    formatted_sessions = []
-    for s in sessions_list:
-        s["_id"] = str(s["_id"])
-        if "created_at" in s and s["created_at"]:
-            s["created_at"] = s["created_at"].strftime("%b %d, %Y")
-        formatted_sessions.append(s)
-        
-    return jsonify({"success": True, "sessions": formatted_sessions})
 
 if __name__ == "__main__":
     app.run(debug=True)

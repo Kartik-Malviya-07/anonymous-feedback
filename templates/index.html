@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Feedback System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card feedback-card">
+            <div class="card-header">
+                {% if session_title %}
+                <h1 style="font-size: 1.5rem; word-break: break-word;">Feedback: {{ session_title }}</h1>
+                {% else %}
+                <h1>Share Your Feedback</h1>
+                {% endif %}
+                <p>We value your anonymous opinion!</p>
+            </div>
+            
+            <form id="feedbackForm">
+                <input type="hidden" id="sessionId" value="{{ session_id }}">
+                <div class="form-group">
+                    <label for="name">Name (Optional)</label>
+                    <input type="text" id="name" name="name" placeholder="Leave empty for anonymous">
+                </div>
+                
+
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating" id="starRating">
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+                    </div>
+                    <input type="hidden" id="rating" name="rating" required>
+                    <p id="ratingError" class="error-msg"></p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Feedback Message</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Tell us what you think..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn primary-btn w-100" id="submitBtn">
+                    <span>Submit Feedback</span>
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+            
+            <div id="successMessage" class="hidden success-msg">
+                <i class="fa-solid fa-circle-check"></i>
+                <p>Thank you! Your feedback has been submitted successfully.</p>
+                <button id="submitAnotherClass" class="btn secondary-btn" onclick="location.reload()">Submit Another</button>
+            </div>
+            
+            <div class="admin-link">
+                <a href="{{ url_for('login') }}">Admin Login <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add script at the bottom -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

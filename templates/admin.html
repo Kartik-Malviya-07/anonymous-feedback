@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Feedback System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fa-solid fa-chart-pie"></i> Feedback Dashboard
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('logout') }}" class="btn outline-btn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <!-- Session Management -->
+        <div class="card mb-4" style="margin-bottom: 32px;">
+            <h3 class="card-title"><i class="fa-solid fa-link"></i> Generate Feedback Link</h3>
+            <div class="generate-link-form" style="margin-bottom: 20px;">
+                <input type="text" id="newSessionTitle" placeholder="Enter session title (e.g. Math 101 Midterm)" style="flex:1;">
+                <div class="select-wrapper session-cat-wrapper">
+                    <select id="newSessionCategory" required>
+                        <option value="" disabled selected>Select Category</option>
+                        <option value="Teaching">Teaching</option>
+                        <option value="Facility">Facility</option>
+                        <option value="Event">Event</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button class="btn primary-btn" onclick="createSession()" id="createSessionBtn">Generate Link</button>
+            </div>
+            
+            <h4 style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">Generated Links</h4>
+            <div class="table-container sessions-list-wrapper">
+                <table class="data-table sessions-data-table">
+                    <thead>
+                        <tr>
+                            <th width="20%">Date</th>
+                            <th width="50%">Title</th>
+                            <th width="30%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody">
+                        <tr><td colspan="3" class="text-center">Loading links...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Total Feedback</h3>
+                    <h2 id="totalCount">0</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div class="stat-details">
+                    <h3>Average Rating</h3>
+                    <h2 id="avgRating">0.0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters & Tools -->
+        <div class="toolbar">
+            <div class="search-filter">
+                <div class="select-wrapper" style="flex: 1;">
+                    <select id="filterSession" onchange="loadFeedback()">
+                        <option value="All">All Feedback Links</option>
+                    </select>
+                </div>
+                <div class="select-wrapper" style="flex: 1;">
+                    <select id="filterCategory" onchange="loadFeedback()">
+                        <option value="All">All Categories</option>
+                        <option value="Teaching">Teaching</option>
+                        <option value="Facility">Facility</option>
+                        <option value="Event">Event</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn primary-btn small-btn" onclick="loadFeedback()">
+                <i class="fa-solid fa-rotate-right"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="15%">Name</th>
+                        <th width="10%">Category</th>
+                        <th width="15%">Rating</th>
+                        <th width="40%">Message</th>
+                        <th width="5%">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center">Loading data...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden empty-state">
+            <i class="fa-solid fa-folder-open empty-icon"></i>
+            <h3>No Records Found</h3>
+            <p>There is no feedback matching your current filters.</p>
+        </div>
+    </div>
+
+    <!-- Deletion Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Start loading dashboard data immediately
+        document.addEventListener("DOMContentLoaded", function() {
+            if(document.getElementById("feedbackTableBody")) {
+                loadFeedback();
+            }
+        });
+    </script>
+</body>
+</html>

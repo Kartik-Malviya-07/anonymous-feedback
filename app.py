@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, render_template, session, redirect, u
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
+import certifi
 
 load_dotenv()
 
@@ -19,7 +20,10 @@ def favicon():
 # MongoDB connection
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 try:
-    client = MongoClient(MONGO_URI)
+    if "mongodb+srv://" in MONGO_URI:
+        client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+    else:
+        client = MongoClient(MONGO_URI)
     db = client.feedback_db
     feedback_collection = db.feedback
     feedback_sessions = db.feedback_sessions
@@ -118,7 +122,10 @@ def get_feedback():
     if session_id and session_id != "All":
         query["session_id"] = session_id
 
-    feedbacks = list(feedback_collection.find(query).sort("created_at", -1))
+    try:
+        feedbacks = list(feedback_collection.find(query).sort("created_at", -1))
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Database connection error: {str(e)}"}), 500
     
     # Format data for JSON serialization
     formatted_feedbacks = []
@@ -175,8 +182,11 @@ def create_session():
         "category": category,
         "created_at": datetime.utcnow()
     }
-    result = feedback_sessions.insert_one(new_session)
-    return jsonify({"success": True, "session_id": str(result.inserted_id)})
+    try:
+        result = feedback_sessions.insert_one(new_session)
+        return jsonify({"success": True, "session_id": str(result.inserted_id)})
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Database error: {str(e)}"}), 500
 
 @app.route("/api/sessions", methods=["GET"])
 def get_sessions():
@@ -184,7 +194,10 @@ def get_sessions():
     if "admin_logged_in" not in session:
         return jsonify({"error": "Unauthorized"}), 401
         
-    sessions_list = list(feedback_sessions.find().sort("created_at", -1))
+    try:
+        sessions_list = list(feedback_sessions.find().sort("created_at", -1))
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Database error: {str(e)}"}), 500
     
     formatted_sessions = []
     for s in sessions_list:
